@@ -18,21 +18,11 @@
         cartridgetype $00
         ramsize $00
 .endgb
+
 .nintendologo
+.include "nintendo_logo.i"
 
-;
-; HARDWARE DEFINES
-;
-.define LCDC $FF40
-.define STAT $FF41
-.define SCY  $FF42
-.define SCX  $FF43
-.define LY   $FF44
-.define LYC  $FF45
-
-.define BGP  $FF47
-.define OBP0 $FF48
-.define OBP1 $FF49
+.INCLUDE "gb_hardware.i"
 
 ;
 ; JUMP VECTORS
@@ -67,28 +57,28 @@ start:
         ; Clear VRAM
         ld hl, $8000
         xor a
-        -:
-                ld (hl), a
-                inc hl
-                bit 5, h
-                jp z, -
+@clearVRam:
+        ld (hl), a
+        inc hl
+        bit 5, h
+        jp z, @clearVRam
 
         ; Test tile
         ld hl, $9000
-        ld de, %0000111100110011
-        ld b, 8
-        -:
-                ld (hl), e
-                inc l
-                ld (hl), d
-                inc l
-                rlc e
-                rlc d
-                dec b
-                jp nz, -
+        ld e, %00001111 ; registers d and e represent the following row of pixels:
+        ld d, %00110011 ;     00 01 01 10 10 11 11
+        ld b, 8         ; 8 rows
+@loadTile:
+        ld (hl), d
+        inc l
+        ld (hl), e
+        inc l
+        rlc e
+        rlc d
+        dec b
+        jp nz, @loadTile
 
         ; Set palettes
-        ;ld a, %11100100
         ld a, %00011011
         ld (BGP), a
 
@@ -122,11 +112,10 @@ screen_off:
         bit 7, a
         jr z, +
 
-        ; Wait for vblank
-        -:
-                ld a, (LY)
-                cp 145
-                jr nz, -
+@waitForVBlank:
+        ld a, (LY)
+        cp 145
+        jr nz, @waitForVBlank
 
         ld a, (LCDC)
         res 7, a
@@ -134,4 +123,3 @@ screen_off:
         +: pop af
         ret
 .ends
-
