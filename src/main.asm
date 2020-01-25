@@ -22,7 +22,7 @@
 .nintendologo
 .include "nintendo_logo.i"
 
-.INCLUDE "gb_hardware.i"
+.include "gb_hardware.i"
 
 ;
 ; JUMP VECTORS
@@ -51,8 +51,7 @@ start:
         or  %00000001
         ld (LCDC), a
 
-        ; Turn screen off
-        call screen_off
+        call screenOff
 
         ; Clear VRAM
         ld hl, $8000
@@ -65,8 +64,8 @@ start:
 
         ; Test tile
         ld hl, $9000
-        ld de, tile_graphics
-        ld bc, tile_graphics_end - tile_graphics
+        ld de, tileGraphics
+        ld bc, tileGraphicsEnd - tileGraphics
 @loadTile:
         ld a, (de)
         ld (hli), a
@@ -81,17 +80,17 @@ start:
         ld (BGP), a
 
         ; Turn screen on
-        call screen_on
+        call screenOn
 
         ; TODO!
         -: jr -
 
-        ; screen_on: Turns the screen on.
+        ; screenOn: Turns the screen on.
         ;
         ; Input: -
         ; Output: -
         ; Clobbers: -
-screen_on:
+screenOn:
         push af
         ld a, (LCDC)
         set 7, a
@@ -99,12 +98,12 @@ screen_on:
         +: pop af
         ret
 
-        ; screen_off: Turns the screen off safely (waits for vblank).
+        ; screenOff: Turns the screen off safely (waits for vblank).
         ;
         ; Input: -
         ; Output: -
         ; Clobbers: -
-screen_off:
+screenOff:
         push af
         ld a, (LCDC)
         bit 7, a
@@ -123,8 +122,7 @@ screen_off:
 .ends
 
 .section "Graphics"
-
-tile_graphics:
+tileGraphics:
         .db %00110011,%00001111
         .db %01100110,%00011110
         .db %11001100,%00111100
@@ -133,6 +131,5 @@ tile_graphics:
         .db %01100110,%11100001
         .db %11001100,%11000011
         .db %10011001,%10000111
-tile_graphics_end:
-
+tileGraphicsEnd:
 .ends
