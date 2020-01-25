@@ -65,18 +65,16 @@ start:
 
         ; Test tile
         ld hl, $9000
-        ld e, %00001111 ; registers d and e represent the following row of pixels:
-        ld d, %00110011 ;     00 01 01 10 10 11 11
-        ld b, 8         ; 8 rows
+        ld de, tile_graphics
+        ld bc, tile_graphics_end - tile_graphics
 @loadTile:
-        ld (hl), d
-        inc l
-        ld (hl), e
-        inc l
-        rlc e
-        rlc d
-        dec b
-        jp nz, @loadTile
+        ld a, (de)
+        ld (hli), a
+        inc de
+        dec bc
+        ld a, b
+        or c            ; Check if count is 0, since `dec bc` doesn't update flags
+        jr nz, @loadTile
 
         ; Set palettes
         ld a, %00011011
@@ -122,4 +120,19 @@ screen_off:
         ld (LCDC), a
         +: pop af
         ret
+.ends
+
+.section "Graphics"
+
+tile_graphics:
+        .db %00110011,%00001111
+        .db %01100110,%00011110
+        .db %11001100,%00111100
+        .db %10011001,%01111000
+        .db %00110011,%11110000
+        .db %01100110,%11100001
+        .db %11001100,%11000011
+        .db %10011001,%10000111
+tile_graphics_end:
+
 .ends
