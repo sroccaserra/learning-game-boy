@@ -20,7 +20,6 @@
 .endgb
 
 .nintendologo
-.include "nintendo_logo.i"
 
 .include "gb_hardware.i"
 
