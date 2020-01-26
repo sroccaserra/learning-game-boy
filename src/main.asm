@@ -2,6 +2,10 @@
 
 INCLUDE "hardware.inc"
 
+SECTION "VBlank", ROM0[$40]
+        call OnVBlank
+        reti
+
 SECTION "Header", ROM0[$100]
 
 EntryPoint:
@@ -58,9 +62,23 @@ Start:
         ; Turn screen on
         call ScreenOn
 
-        ; TODO!
-GameLoop:
-        jr GameLoop
+        ; Enable VBlank interrupt
+        ld a, IEF_VBLANK
+        ld [rIE], a
+        ei
+
+MainLoop:
+        jr MainLoop
+
+OnVBlank:
+        push af
+        push hl
+        ld a, [rSCX]
+        inc a
+        ld [rSCX],a
+        pop hl
+        pop af
+        ret
 
         ; ScreenOn: Turns the screen on.
 ScreenOn:
@@ -76,7 +94,7 @@ ScreenOff:
         push af
         ld a, [rLCDC]
         bit 7, a
-        jr z, .endVBlank
+        jr z, .end
 
 .waitForVBlank:
         ld a, [rLY]
@@ -86,7 +104,7 @@ ScreenOff:
         ld a, [rLCDC]
         res 7, a
         ld [rLCDC], a
-.endVBlank:
+.end:
         pop af
         ret
 
