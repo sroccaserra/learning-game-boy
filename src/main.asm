@@ -27,14 +27,14 @@ Start:
 
         ; Set up LCDC
         ld a, [rLCDC]
-        and %10000000
-        or  %00000001
+        and LCDCF_ON
+        or LCDCF_BGON
         ld [rLCDC], a
 
         call ScreenOff
 
         ; Clear VRAM
-        ld hl, $8000
+        ld hl, _VRAM
         xor a
 .clearVRam:
         ld [hl], a
@@ -55,8 +55,7 @@ Start:
         or c            ; Check if count is 0, since `dec bc` doesn't update flags
         jr nz, .loadTile
 
-        ; Set palettes
-        ld a, %00011011
+        ld a, [Palette]
         ld [rBGP], a
 
         ; Turn screen on
@@ -72,24 +71,20 @@ MainLoop:
 
 OnVBlank:
         push af
-        push hl
         ld a, [rSCX]
         inc a
         ld [rSCX],a
-        pop hl
         pop af
         ret
 
-        ; ScreenOn: Turns the screen on.
 ScreenOn:
         push af
         ld a, [rLCDC]
-        set 7, a
+        or LCDCF_ON
         ld [rLCDC], a
         pop af
         ret
 
-        ; ScreenOff: Turns the screen off safely (waits for vblank).
 ScreenOff:
         push af
         ld a, [rLCDC]
@@ -109,6 +104,10 @@ ScreenOff:
         ret
 
 SECTION "Graphics", ROM0
+
+Palette:
+        DB %00011011
+
 TileGraphics:
         DB %00110011,%00001111
         DB %01100110,%00011110
