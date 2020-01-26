@@ -1,11 +1,14 @@
+Display a simple scrolling background.
+
+![screenshot](images/screenshot.png)
 
 ## References
 
 ### Tools
 
+- <https://rednex.github.io/rgbds/>
 - <https://github.com/vhelin/wla-dx>
 - <https://wla-dx.readthedocs.io/en/latest/>
-- <https://rednex.github.io/rgbds/>
 - <https://sameboy.github.io/debugger/>
 
 ### Examples
