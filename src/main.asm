@@ -92,8 +92,9 @@ ScreenOff:
         jr z, .end
 
 .waitForVBlank:
-        ld a, [rLY]
-        cp 145
+        ld a, [rSTAT]
+        and (STATF_OAM | STATF_VB)
+        cp STATF_VB
         jr nz, .waitForVBlank
 
         ld a, [rLCDC]
