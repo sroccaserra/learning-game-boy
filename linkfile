@@ -1,2 +1,2 @@
 [objects]
-main.o
+build/main.o
