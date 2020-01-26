@@ -107,15 +107,8 @@ ScreenOff:
 SECTION "Graphics", ROM0
 
 Palette:
-        DB %00011011
+        DB %11100100
 
 TileGraphics:
-        DB %00110011,%00001111
-        DB %01100110,%00011110
-        DB %11001100,%00111100
-        DB %10011001,%01111000
-        DB %00110011,%11110000
-        DB %01100110,%11100001
-        DB %11001100,%11000011
-        DB %10011001,%10000111
+INCBIN "tile.2bpp"
 TileGraphicsEnd:
