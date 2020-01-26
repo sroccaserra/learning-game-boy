@@ -1,134 +1,103 @@
 ;; vim: set filetype=z80:
 
-.memorymap
-        slotsize $4000
-        slot 0 $0000
-        slot 1 $4000
-        defaultslot 0
-.endme
+INCLUDE "hardware.inc"
 
-.rombankmap
-        bankstotal 2
-        banksize $4000
-        banks 2
-.endro
+SECTION "Header", ROM0[$100]
 
-.gbheader
-        name "GB TEMPLATE"
-        cartridgetype $00
-        ramsize $00
-.endgb
-
-.nintendologo
-
-.include "gb_hardware.i"
-
-;
-; JUMP VECTORS
-;
-
-.bank 0 slot 0
-.org $0100
-.section "Vec_Jump" size 4 force
+EntryPoint:
         nop
-        jp start
-.ends
+        jp Start
 
-;
+REPT $150 - $104
+    db 0
+ENDR
+
 ; MAIN CODE
 ;
 
-.section "Code1x"
-start:
+SECTION "Game code", ROM0
+Start:
         ; Usual setup
         di
         ld sp, $DFF0
 
         ; Set up LCDC
-        ld a, (LCDC)
+        ld a, [rLCDC]
         and %10000000
         or  %00000001
-        ld (LCDC), a
+        ld [rLCDC], a
 
-        call screenOff
+        call ScreenOff
 
         ; Clear VRAM
         ld hl, $8000
         xor a
-@clearVRam:
-        ld (hl), a
+.clearVRam:
+        ld [hl], a
         inc hl
         bit 5, h
-        jp z, @clearVRam
+        jp z, .clearVRam
 
         ; Test tile
         ld hl, $9000
-        ld de, tileGraphics
-        ld bc, tileGraphicsEnd - tileGraphics
-@loadTile:
-        ld a, (de)
-        ld (hli), a
+        ld de, TileGraphics
+        ld bc, TileGraphicsEnd - TileGraphics
+.loadTile:
+        ld a, [de]
+        ld [hli], a
         inc de
         dec bc
         ld a, b
         or c            ; Check if count is 0, since `dec bc` doesn't update flags
-        jr nz, @loadTile
+        jr nz, .loadTile
 
         ; Set palettes
         ld a, %00011011
-        ld (BGP), a
+        ld [rBGP], a
 
         ; Turn screen on
-        call screenOn
+        call ScreenOn
 
         ; TODO!
-        -: jr -
+GameLoop:
+        jr GameLoop
 
-        ; screenOn: Turns the screen on.
-        ;
-        ; Input: -
-        ; Output: -
-        ; Clobbers: -
-screenOn:
+        ; ScreenOn: Turns the screen on.
+ScreenOn:
         push af
-        ld a, (LCDC)
+        ld a, [rLCDC]
         set 7, a
-        ld (LCDC), a
-        +: pop af
+        ld [rLCDC], a
+        pop af
         ret
 
-        ; screenOff: Turns the screen off safely (waits for vblank).
-        ;
-        ; Input: -
-        ; Output: -
-        ; Clobbers: -
-screenOff:
+        ; ScreenOff: Turns the screen off safely (waits for vblank).
+ScreenOff:
         push af
-        ld a, (LCDC)
+        ld a, [rLCDC]
         bit 7, a
-        jr z, +
+        jr z, .endVBlank
 
-@waitForVBlank:
-        ld a, (LY)
+.waitForVBlank:
+        ld a, [rLY]
         cp 145
-        jr nz, @waitForVBlank
+        jr nz, .waitForVBlank
 
-        ld a, (LCDC)
+        ld a, [rLCDC]
         res 7, a
-        ld (LCDC), a
-        +: pop af
+        ld [rLCDC], a
+.endVBlank:
+        pop af
         ret
-.ends
 
-.section "Graphics"
-tileGraphics:
-        .db %00110011,%00001111
-        .db %01100110,%00011110
-        .db %11001100,%00111100
-        .db %10011001,%01111000
-        .db %00110011,%11110000
-        .db %01100110,%11100001
-        .db %11001100,%11000011
-        .db %10011001,%10000111
-tileGraphicsEnd:
-.ends
+SECTION "Graphics", ROM0
+TileGraphics:
+        DB %00110011,%00001111
+        DB %01100110,%00011110
+        DB %11001100,%00111100
+        DB %10011001,%01111000
+        DB %00110011,%11110000
+        DB %01100110,%11100001
+        DB %11001100,%11000011
+        DB %10011001,%10000111
+TileGraphicsEnd:

@@ -2,17 +2,17 @@ SRC_DIR = src
 INC_DIR = include
 BUILD_DIR = build
 
-AS = wla-gb
-ASFLAGS = -I$(INC_DIR)
-LD = wlalink
-LDFLAGS = -r linkfile
+AS = rgbasm
+ASFLAGS = -i $(INC_DIR)/
+LD = rgblink
 
 ASM_FILES = $(wildcard $(SRC_DIR)/*.asm)
 OBJ_FILES = $(patsubst $(SRC_DIR)/%,$(BUILD_DIR)/%,$(ASM_FILES:.asm=.o))
 BIN_FILE = cart.gb
 
 $(BIN_FILE): $(OBJ_FILES)
-	$(LD) $(LDFLAGS) $(BIN_FILE)
+	$(LD) -o $(BIN_FILE) $(OBJ_FILES)
+	rgbfix -v -p 0 $(BIN_FILE)
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
