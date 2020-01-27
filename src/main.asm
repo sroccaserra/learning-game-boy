@@ -74,6 +74,7 @@ OnVBlank:
         ld a, [rSCX]
         inc a
         ld [rSCX],a
+        ld [rSCY],a
         pop af
         ret
 
