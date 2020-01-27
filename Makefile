@@ -10,7 +10,12 @@ ASM_FILES = $(wildcard $(SRC_DIR)/*.asm)
 OBJ_FILES = $(patsubst $(SRC_DIR)/%,$(BUILD_DIR)/%,$(ASM_FILES:.asm=.o))
 PNG_FILES = $(wildcard $(SRC_DIR)/*.png)
 2BPP_FILES = $(patsubst $(SRC_DIR)/%,$(BUILD_DIR)/%,$(PNG_FILES:.png=.2bpp))
+FIXED_PNG_FILES = $(patsubst $(SRC_DIR)/%,$(BUILD_DIR)/%,$(PNG_FILES))
 BIN_FILE = cart.gb
+
+default: run
+
+fixed_png_files: $(FIXED_PNG_FILES)
 
 $(BIN_FILE): $(OBJ_FILES)
 	$(LD) -o $(BIN_FILE) $(OBJ_FILES)
@@ -19,7 +24,10 @@ $(BIN_FILE): $(OBJ_FILES)
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
-$(BUILD_DIR)/%.2bpp: $(SRC_DIR)/%.png $(BUILD_DIR)
+$(BUILD_DIR)/%.png: $(SRC_DIR)/%.png $(BUILD_DIR)
+	convert $< PNG32:$@
+
+$(BUILD_DIR)/%.2bpp: $(BUILD_DIR)/%.png
 	rgbgfx -o $@ $<
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.asm $(2BPP_FILES) $(BUILD_DIR)
