@@ -71,10 +71,35 @@ MainLoop:
 
 OnVBlank:
         push af
+        ld a, P1F_5
+        ld [rP1], a
+        ld a, [rP1]
+        ld b, a
+.ifRight:
+        bit $0, b
+        jr nz, .ifLeft
         ld a, [rSCX]
         inc a
         ld [rSCX],a
+.ifLeft:
+        bit $1, b
+        jr nz, .ifUp
+        ld a, [rSCX]
+        dec a
+        ld [rSCX],a
+.ifUp:
+        bit $2, b
+        jr nz, .ifDown
+        ld a, [rSCY]
+        dec a
         ld [rSCY],a
+.ifDown:
+        bit $3, b
+        jr nz, .end
+        ld a, [rSCY]
+        inc a
+        ld [rSCY],a
+.end:
         pop af
         ret
 
