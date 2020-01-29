@@ -13,7 +13,7 @@ EntryPoint:
         jp Start
 
 REPT $150 - $104
-    db 0
+    DB 0
 ENDR
 
 ; MAIN CODE
@@ -71,36 +71,61 @@ MainLoop:
 
 OnVBlank:
         push af
-        ld a, P1F_5
-        ld [rP1], a
-        ld a, [rP1]
-        ld b, a
+
+        call ReadJoypadState
+
+        ; Scroll in joypad direction
+        ld hl, rSCX
+        ld b, [hl]
+        ld hl, rSCY
+        ld c, [hl]
+        ld a, [JoypadState]
 .ifRight:
-        bit $0, b
+        bit PADB_RIGHT, a
         jr nz, .ifLeft
-        ld a, [rSCX]
-        inc a
-        ld [rSCX],a
+        inc b
 .ifLeft:
-        bit $1, b
+        bit PADB_LEFT, a
         jr nz, .ifUp
-        ld a, [rSCX]
-        dec a
-        ld [rSCX],a
+        dec b
 .ifUp:
-        bit $2, b
+        bit PADB_UP, a
         jr nz, .ifDown
-        ld a, [rSCY]
-        dec a
-        ld [rSCY],a
+        dec c
 .ifDown:
-        bit $3, b
-        jr nz, .end
-        ld a, [rSCY]
-        inc a
-        ld [rSCY],a
-.end:
+        bit PADB_DOWN, a
+        jr nz, .updateScroll
+        inc c
+.updateScroll:
+        ld hl, rSCX
+        ld [hl], b
+        ld hl, rSCY
+        ld [hl], c
+
         pop af
+        ret
+
+ReadJoypadState:
+        ; read directions
+        ld a, P1F_5
+        ldh [rP1], a
+        ld a, [rP1]
+        ld a, [rP1]
+        cpl             ; direction down -> bit set
+        and a, $0f      ; keep lower four bytes
+        swap a          ; move them to higher four bytes
+        ld b, a
+        ; read buttons
+        ld a, P1F_4
+        ldh [rP1], a
+        REPT 6
+        ld a, [rP1]
+        ENDR
+        cpl
+        and a, $0f
+        or a, b
+        ld [JoypadState], a
+        ld a, [JoypadState]
         ret
 
 ScreenOn:
@@ -129,6 +154,11 @@ ScreenOff:
 .end:
         pop af
         ret
+
+SECTION "Vars", WRAM0[_RAM]
+
+JoypadState:
+        DB
 
 SECTION "Graphics", ROM0
 
