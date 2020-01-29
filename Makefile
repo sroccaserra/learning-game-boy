@@ -28,7 +28,11 @@ $(BUILD_DIR)/%.png: $(SRC_DIR)/%.png $(BUILD_DIR)
 	convert $< PNG32:$@
 
 $(BUILD_DIR)/%.2bpp: $(BUILD_DIR)/%.png
-	rgbgfx -o $@ $<
+	convert $< -compress none pgm:-|\
+		tail -n +4|\
+		paste -s -|\
+		tools/pgm_to_2bpp.awk |\
+		xxd -p -r > $@
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.asm $(2BPP_FILES) $(BUILD_DIR)
 	$(AS) $(ASFLAGS) -o $@ $<
