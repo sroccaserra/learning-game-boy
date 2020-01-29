@@ -1,13 +1,35 @@
-Display a simple scrolling background.
+Display a simple background & scroll with the joypad.
 
 ![screenshot](images/screenshot.png)
+
+## Prerequisites
+
+- [RGBDS][rgbds] to build the code
+- [ImageMagick][magick] and [GNU Awk][gawk] to build the graphics
+
+[rgbds]: https://github.com/rednex/rgbds
+[magick]: https://imagemagick.org/index.php
+[gawk]: https://www.gnu.org/software/gawk/
+
+## Build the cartridge
+
+To build the `cart.gb` file:
+
+    $ make cart.gb
+
+## Run the cartridge
+
+Open the `cart.gb` file in your favorite Game Boy emulator or load it in your linker.
+
+Note: tested on Game Boy Color.
 
 ## References
 
 ### Manuals
 
-- <https://www.reddit.com/r/retrogamedev/comments/1ur5od/gb_official_game_boy_programming_manual/>
+- <https://archive.org/details/GameBoyProgManVer1.1/mode/2up>
 - <http://marc.rawer.de/Gameboy/Docs/GBCPUman.pdf>
+- <https://rednex.github.io/rgbds/gbz80.7.html>
 
 ### Tools
 
@@ -26,12 +48,14 @@ Emulators with debugger:
 
 Community:
 
+- <http://bgb.bircd.org/pandocs.htm>
 - <https://gbdev.github.io/>
 - <https://fms.komkon.org/GameBoy/>
 - <https://fms.komkon.org/GameBoy/Tech/Software.html>
 - <https://github.com/gbdev/awesome-gbdev>
 - <https://github.com/gbdev/hardware.inc>
 - <http://devrs.com/gb/index.php>
+- <https://www.pastraiser.com/cpu/gameboy/gameboy_opcodes.html>
 
 Tutorials:
 
@@ -39,3 +63,4 @@ Tutorials:
 - <https://eldred.fr/gb-asm-tutorial/>
 - <https://www.chibiakumas.com/z80/Gameboy.php>
 - <https://gist.github.com/iamgreaser/9cccd24dd4519a0ae95240d8b8eeb252>
+- <https://exez.in/gameboy-dma>
