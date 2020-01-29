@@ -1,3 +1,5 @@
+;; vim: set filetype=z80:
+
 ;*
 ;* Gameboy Hardware definitions
 ;*
