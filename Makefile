@@ -40,5 +40,9 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.asm $(2BPP_FILES) $(BUILD_DIR)
 run: $(BIN_FILE)
 	open -a SameBoy $(BIN_FILE)
 
+upload: $(BIN_FILE)
+	ems-flasher --bank 1 --write --verbose $(BIN_FILE)
+	ems-flasher --title
+
 clean:
 	rm -rf $(BUILD_DIR) $(BIN_FILE)
