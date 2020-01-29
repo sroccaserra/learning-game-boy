@@ -23,7 +23,7 @@ SECTION "Game code", ROM0
 Start:
         ; Usual setup
         di
-        ld sp, $DFF0
+        ld sp, $FFFE
 
         ; Set up LCDC
         ld a, [rLCDC]
@@ -67,6 +67,8 @@ Start:
         ei
 
 MainLoop:
+        halt
+        nop
         jr MainLoop
 
 OnVBlank:
