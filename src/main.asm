@@ -145,9 +145,8 @@ ScreenOff:
         jr z, .end
 
 .waitForVBlank:
-        ld a, [rSTAT]
-        and (STATF_OAM | STATF_VB)
-        cp STATF_VB
+        ld a, [rLY]
+        cp 145
         jr nz, .waitForVBlank
 
         ld a, [rLCDC]
@@ -168,5 +167,5 @@ Palette:
         DB %11100100
 
 TileGraphics:
-INCBIN "tile.2bpp"
+        INCBIN "tile.2bpp"
 TileGraphicsEnd:
