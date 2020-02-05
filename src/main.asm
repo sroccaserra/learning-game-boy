@@ -98,6 +98,11 @@ Start:
         dec b
         jr nz, .clearOamBuffer
 
+        ; Init player state
+        ld a, 34
+        ld [PlayerX], a
+        ld [PlayerY], a
+
         ; Turn screen on
         call ScreenOn
 
@@ -117,42 +122,42 @@ OnVBlank:
         call ReadJoypadState
 
         ; Scroll in joypad direction
-        ld hl, rSCX
+        ld hl, PlayerX
         ld b, [hl]
-        ld hl, rSCY
+        ld hl, PlayerY
         ld c, [hl]
         ld a, [JoypadState]
 .ifRight:
         bit PADB_RIGHT, a
         jr nz, .ifLeft
-        inc b
+        dec b
 .ifLeft:
         bit PADB_LEFT, a
         jr nz, .ifUp
-        dec b
+        inc b
 .ifUp:
         bit PADB_UP, a
         jr nz, .ifDown
-        dec c
+        inc c
 .ifDown:
         bit PADB_DOWN, a
         jr nz, .updateScroll
-        inc c
+        dec c
 .updateScroll:
-        ld hl, rSCX
+        ld hl, PlayerX
         ld [hl], b
-        ld hl, rSCY
+        ld hl, PlayerY
         ld [hl], c
 
         ; load sprite attributes
         ld hl, OamBuffer
-        ld a, 64
+        ld a, [PlayerY]
         ld [hl+], a     ; y-coord
+        ld a, [PlayerX]
         ld [hl+], a     ; x-coord
-        ld a, 0       ; tile index
+        ld a, 0         ; tile index
         ld [hl+], a
-        ; attributes, including palette, which are all zero
-        ld a, %00000000
+        ld a, %00000000 ; attributes, including palette, which are all zero
         ld [hl+], a
 
         call DmaRoutine
@@ -212,6 +217,11 @@ ScreenOff:
 SECTION "Vars", WRAM0[_RAM]
 
 JoypadState:
+        DB
+
+PlayerX:
+        DB
+PlayerY:
         DB
 
 SECTION "OAM Buffer", WRAM0[$C100]

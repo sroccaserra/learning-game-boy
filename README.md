@@ -1,4 +1,4 @@
-Display a simple background & scroll with the joypad.
+Display a simple background & move a simple sprite with the joypad.
 
 ![screenshot](images/screenshot.png)
 
