@@ -20,6 +20,17 @@ ENDR
 ;
 
 SECTION "Game code", ROM0
+
+DmaCode:
+        ld a, $c1
+        ld [rDMA], a
+        ld a, 40
+.loop:                  ; wait 160 cycles/microseconds
+        dec a
+        jr nz, .loop
+        ret
+DmaCodeEnd:
+
 Start:
         ; Usual setup
         di
@@ -29,6 +40,7 @@ Start:
         ld a, [rLCDC]
         and LCDCF_ON
         or LCDCF_BGON
+        or LCDCF_OBJON
         ld [rLCDC], a
 
         call ScreenOff
@@ -37,26 +49,54 @@ Start:
         ld hl, _VRAM
         xor a
 .clearVRam:
-        ld [hl], a
-        inc hl
+        ld [hl+], a
         bit 5, h
         jp z, .clearVRam
 
-        ; Test tile
+        ; Load DMA routine in High RAM
+        ld bc, DmaCode
+        ld hl, DmaRoutine
+        REPT DmaCodeEnd - DmaCode
+        ld a, [bc]
+        inc bc
+        ld [hl+], a
+        ENDR
+
+        ; Load tile in VRAM
         ld hl, $9000
         ld de, TileGraphics
         ld bc, TileGraphicsEnd - TileGraphics
 .loadTile:
         ld a, [de]
-        ld [hli], a
+        ld [hl+], a
         inc de
         dec bc
         ld a, b
         or c            ; Check if count is 0, since `dec bc` doesn't update flags
         jr nz, .loadTile
 
-        ld a, [Palette]
+        ld a, [BgPalette]
         ld [rBGP], a
+
+        ; Load sprite in VRAM
+        ld hl, $8000
+        ld bc, Sprite
+        REPT 16
+        ld a, [bc]
+        ld [hl+], a
+        inc bc
+        ENDR
+        ld a, [SpritePalette]
+        ld [rOBP0], a
+
+        ; Clear OamBuffer
+        ld hl, OamBuffer
+        ld b, 40*4
+        xor a
+.clearOamBuffer:
+        ld [hl+], a
+        dec b
+        jr nz, .clearOamBuffer
 
         ; Turn screen on
         call ScreenOn
@@ -103,6 +143,19 @@ OnVBlank:
         ld [hl], b
         ld hl, rSCY
         ld [hl], c
+
+        ; load sprite attributes
+        ld hl, OamBuffer
+        ld a, 64
+        ld [hl+], a     ; y-coord
+        ld [hl+], a     ; x-coord
+        ld a, 0       ; tile index
+        ld [hl+], a
+        ; attributes, including palette, which are all zero
+        ld a, %00000000
+        ld [hl+], a
+
+        call DmaRoutine
 
         pop af
         ret
@@ -161,11 +214,34 @@ SECTION "Vars", WRAM0[_RAM]
 JoypadState:
         DB
 
+SECTION "OAM Buffer", WRAM0[$C100]
+
+OamBuffer:
+        DS 4*40         ; 40 sprites data
+
+SECTION "High Ram", HRAM
+
+DmaRoutine:
+        DS DmaCodeEnd - DmaCode
+
 SECTION "Graphics", ROM0
 
-Palette:
+BgPalette:
         DB %11100100
 
 TileGraphics:
         INCBIN "tile.2bpp"
 TileGraphicsEnd:
+
+SpritePalette:
+        DB %11100100
+
+Sprite:
+        DW `02222220
+        DW `21111113
+        DW `21333313
+        DW `21311213
+        DW `21311213
+        DW `21322213
+        DW `21111113
+        DW `03333330
