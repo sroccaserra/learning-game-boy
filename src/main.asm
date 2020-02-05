@@ -129,20 +129,20 @@ OnVBlank:
         ld a, [JoypadState]
 .ifRight:
         bit PADB_RIGHT, a
-        jr nz, .ifLeft
-        dec b
+        jr z, .ifLeft
+        inc b
 .ifLeft:
         bit PADB_LEFT, a
-        jr nz, .ifUp
-        inc b
+        jr z, .ifUp
+        dec b
 .ifUp:
         bit PADB_UP, a
-        jr nz, .ifDown
-        inc c
+        jr z, .ifDown
+        dec c
 .ifDown:
         bit PADB_DOWN, a
-        jr nz, .updateScroll
-        dec c
+        jr z, .updateScroll
+        inc c
 .updateScroll:
         ld hl, PlayerX
         ld [hl], b
