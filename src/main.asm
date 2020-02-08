@@ -120,8 +120,14 @@ OnVBlank:
         push af
 
         call ReadJoypadState
+        call UpdatePosition
+        call DmaRoutine
 
-        ; Scroll in joypad direction
+        pop af
+        ret
+
+
+UpdatePosition:
         ld hl, PlayerX
         ld b, [hl]
         ld hl, PlayerY
@@ -141,15 +147,15 @@ OnVBlank:
         dec c
 .ifDown:
         bit PADB_DOWN, a
-        jr z, .updateScroll
+        jr z, .updatePosition
         inc c
-.updateScroll:
+.updatePosition:
         ld hl, PlayerX
         ld [hl], b
         ld hl, PlayerY
         ld [hl], c
 
-        ; load sprite attributes
+        ; update sprite attributes
         ld hl, OamBuffer
         ld a, [PlayerY]
         ld [hl+], a     ; y-coord
@@ -160,9 +166,6 @@ OnVBlank:
         ld a, %00000000 ; attributes, including palette, which are all zero
         ld [hl+], a
 
-        call DmaRoutine
-
-        pop af
         ret
 
 ReadJoypadState:
