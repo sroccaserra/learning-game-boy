@@ -22,7 +22,7 @@ ENDR
 SECTION "Game code", ROM0
 
 DmaCode:
-        ld a, $c1
+        ld a, HIGH(wOamBuffer)
         ld [rDMA], a
         ld a, 40
 .loop:                  ; wait 160 cycles/microseconds
