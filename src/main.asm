@@ -153,39 +153,34 @@ Update:
         ; Update scrolling at 30 fps, skipping every other frame
         ; 'hl' still holds frame counter address
         bit 0, [hl]
-        jr z, .updatePlayer
+        jr z, .updatePlayerX
         ld a, [wScrollX]
         inc a
         ld [wScrollX], a
         ld [rSCX], a
 
-.updatePlayer:
-        ld hl, wPlayerX
-        ld b, [hl]
-        ld hl, wPlayerY
-        ld c, [hl]
+.updatePlayerX:
         ld a, [wJoypadState]
+        ld hl, wPlayerX
 .ifRight:
         bit PADB_RIGHT, a
         jr z, .ifLeft
-        inc b
+        inc [hl]
 .ifLeft:
         bit PADB_LEFT, a
-        jr z, .ifUp
-        dec b
+        jr z, .updatePlayerY
+        dec [hl]
+.updatePlayerY
+        ld hl, wPlayerY
 .ifUp:
         bit PADB_UP, a
         jr z, .ifDown
-        dec c
+        dec [hl]
 .ifDown:
         bit PADB_DOWN, a
-        jr z, .updatePosition
-        inc c
-.updatePosition:
-        ld hl, wPlayerX
-        ld [hl], b
-        ld hl, wPlayerY
-        ld [hl], c
+        jr z, .playerYDone
+        inc [hl]
+.playerYDone:
 
         ; update sprite attributes
         ld hl, wOamBuffer
