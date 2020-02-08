@@ -102,6 +102,11 @@ Start:
         ld a, 34
         ld [wPlayerX], a
         ld [wPlayerY], a
+        ; Init scroll state
+        xor a
+        ld [wScrollX], a
+        ; Init frame counter
+        ld [hFrameCounter], a
 
         ; Turn screen on
         call ScreenOn
@@ -142,6 +147,19 @@ OnVBlank:
 
 
 Update:
+        ld hl, hFrameCounter
+        inc [hl]
+
+        ; Update scrolling at 30 fps, skipping every other frame
+        ; 'hl' still holds frame counter address
+        bit 0, [hl]
+        jr z, .updatePlayer
+        ld a, [wScrollX]
+        inc a
+        ld [wScrollX], a
+        ld [rSCX], a
+
+.updatePlayer:
         ld hl, wPlayerX
         ld b, [hl]
         ld hl, wPlayerY
@@ -241,6 +259,9 @@ wPlayerX:
 wPlayerY:
         DB
 
+wScrollX:
+        DB
+
 SECTION "OAM Buffer", WRAM0[$C100]
 
 wOamBuffer:
@@ -251,6 +272,8 @@ SECTION "High Ram", HRAM
 hDmaRoutine:
         DS DmaCodeEnd - DmaCode
 hVBlankFlag:
+        DB
+hFrameCounter:
         DB
 
 SECTION "Graphics", ROM0
