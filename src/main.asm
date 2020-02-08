@@ -55,7 +55,7 @@ Start:
 
         ; Load DMA routine in High RAM
         ld bc, DmaCode
-        ld hl, DmaRoutine
+        ld hl, hDmaRoutine
         REPT DmaCodeEnd - DmaCode
         ld a, [bc]
         inc bc
@@ -89,8 +89,8 @@ Start:
         ld a, [SpritePalette]
         ld [rOBP0], a
 
-        ; Clear OamBuffer
-        ld hl, OamBuffer
+        ; Clear OAM buffer
+        ld hl, wOamBuffer
         ld b, 40*4
         xor a
 .clearOamBuffer:
@@ -100,8 +100,8 @@ Start:
 
         ; Init player state
         ld a, 34
-        ld [PlayerX], a
-        ld [PlayerY], a
+        ld [wPlayerX], a
+        ld [wPlayerY], a
 
         ; Turn screen on
         call ScreenOn
@@ -121,18 +121,18 @@ OnVBlank:
 
         call ReadJoypadState
         call UpdatePosition
-        call DmaRoutine
+        call hDmaRoutine
 
         pop af
         ret
 
 
 UpdatePosition:
-        ld hl, PlayerX
+        ld hl, wPlayerX
         ld b, [hl]
-        ld hl, PlayerY
+        ld hl, wPlayerY
         ld c, [hl]
-        ld a, [JoypadState]
+        ld a, [wJoypadState]
 .ifRight:
         bit PADB_RIGHT, a
         jr z, .ifLeft
@@ -150,16 +150,16 @@ UpdatePosition:
         jr z, .updatePosition
         inc c
 .updatePosition:
-        ld hl, PlayerX
+        ld hl, wPlayerX
         ld [hl], b
-        ld hl, PlayerY
+        ld hl, wPlayerY
         ld [hl], c
 
         ; update sprite attributes
-        ld hl, OamBuffer
-        ld a, [PlayerY]
+        ld hl, wOamBuffer
+        ld a, [wPlayerY]
         ld [hl+], a     ; y-coord
-        ld a, [PlayerX]
+        ld a, [wPlayerX]
         ld [hl+], a     ; x-coord
         ld a, 0         ; tile index
         ld [hl+], a
@@ -187,8 +187,8 @@ ReadJoypadState:
         cpl
         and a, $0f
         or a, b
-        ld [JoypadState], a
-        ld a, [JoypadState]
+        ld [wJoypadState], a
+        ld a, [wJoypadState]
         ret
 
 ScreenOn:
@@ -219,22 +219,22 @@ ScreenOff:
 
 SECTION "Vars", WRAM0[_RAM]
 
-JoypadState:
+wJoypadState:
         DB
 
-PlayerX:
+wPlayerX:
         DB
-PlayerY:
+wPlayerY:
         DB
 
 SECTION "OAM Buffer", WRAM0[$C100]
 
-OamBuffer:
+wOamBuffer:
         DS 4*40         ; 40 sprites data
 
 SECTION "High Ram", HRAM
 
-DmaRoutine:
+hDmaRoutine:
         DS DmaCodeEnd - DmaCode
 
 SECTION "Graphics", ROM0
