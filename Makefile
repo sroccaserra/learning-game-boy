@@ -37,12 +37,15 @@ $(BUILD_DIR)/%.2bpp: $(BUILD_DIR)/%.png
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.asm $(2BPP_FILES) $(BUILD_DIR)
 	$(AS) $(ASFLAGS) -o $@ $<
 
+.PHONY: run
 run: $(BIN_FILE)
 	open -a SameBoy $(BIN_FILE)
 
+.PHONY: upload
 upload: $(BIN_FILE)
 	ems-flasher --bank 1 --write --verbose $(BIN_FILE)
 	ems-flasher --title
 
+.PHONY: clean
 clean:
 	rm -rf $(BUILD_DIR) $(BIN_FILE)
