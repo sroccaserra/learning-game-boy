@@ -112,22 +112,36 @@ Start:
         ei
 
 MainLoop:
+        call ReadJoypadState
+        call Update
+.waitForVBlank
         halt
         nop
+        ld a, [hVBlankFlag]
+        and a
+        jr z, .waitForVBlank
+        xor a
+        ld [hVBlankFlag], a
         jr MainLoop
 
 OnVBlank:
         push af
+        push bc
+        push de
+        push hl
 
-        call ReadJoypadState
-        call UpdatePosition
         call hDmaRoutine
+        ld a, 1
+        ld [hVBlankFlag], a
 
+        pop hl
+        pop de
+        pop bc
         pop af
         ret
 
 
-UpdatePosition:
+Update:
         ld hl, wPlayerX
         ld b, [hl]
         ld hl, wPlayerY
@@ -236,6 +250,8 @@ SECTION "High Ram", HRAM
 
 hDmaRoutine:
         DS DmaCodeEnd - DmaCode
+hVBlankFlag:
+        DB
 
 SECTION "Graphics", ROM0
 
